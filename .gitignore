@@ -1,0 +1,23 @@
+# Build results
+bin/
+obj/
+EXE/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+*.cache
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store

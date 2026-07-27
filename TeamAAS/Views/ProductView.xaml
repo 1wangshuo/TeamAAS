@@ -1,0 +1,108 @@
+<UserControl x:Class="TeamAAS.Views.ProductView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="280"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: Node Toolbox -->
+        <Border Grid.Column="0" Background="{DynamicResource RegionBrush}" 
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="8,12">
+                <TextBlock DockPanel.Dock="Top" Text="节点工具箱" FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Expander Header="采集类" IsExpanded="True" Margin="0,2">
+                            <StackPanel Margin="20,4,0,0">
+                                <TextBlock Text="📷 海康拍照" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="📷 Basler 拍照" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="逻辑类" IsExpanded="True" Margin="0,2">
+                            <StackPanel Margin="20,4,0,0">
+                                <TextBlock Text="🔀 条件分支" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="🔁 计数循环" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="🔁 条件循环" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="⏭ Break" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="⏭ Continue" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="通信类" Margin="0,2">
+                            <StackPanel Margin="20,4,0,0">
+                                <TextBlock Text="📡 PLC读取" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                                <TextBlock Text="📡 PLC写入" FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4"/>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Center: Flow Editor Canvas Placeholder -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar -->
+            <Border Grid.Row="0" Background="{DynamicResource SecondaryRegionBrush}" Padding="12,6">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="放大" Padding="12,4" Margin="0,0,4,0"/>
+                    <Button Content="缩小" Padding="12,4" Margin="0,0,4,0"/>
+                    <Button Content="适应" Padding="12,4" Margin="0,0,4,0"/>
+                    <Button Content="撤销" Padding="12,4" Margin="0,0,4,0"/>
+                    <Button Content="▶ 运行" Style="{StaticResource ButtonPrimary}" Padding="12,4" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Canvas -->
+            <Border Grid.Row="1" Background="{DynamicResource BackgroundBrush}">
+                <Canvas>
+                    <TextBlock Text="FlowEditor 画布区域" Canvas.Left="200" Canvas.Top="150"
+                               FontSize="20" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                </Canvas>
+            </Border>
+        </Grid>
+
+        <!-- Right: Properties Panel -->
+        <Border Grid.Column="2" Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
+            <DockPanel Margin="12,12">
+                <TextBlock DockPanel.Dock="Top" Text="流程属性" FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                <StackPanel>
+                    <TextBlock Text="流程名称" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBox Text="上料检测" Margin="0,0,0,12"/>
+                    <TextBlock Text="流程变量" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <Border Background="{DynamicResource SecondaryRegionBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,0,4">
+                        <TextBlock Text="product_id" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </Border>
+                    <Border Background="{DynamicResource SecondaryRegionBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,0,4">
+                        <TextBlock Text="result" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </Border>
+                    <Border Background="{DynamicResource SecondaryRegionBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,0,12">
+                        <TextBlock Text="count" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </Border>
+                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Margin="0,8,0,0" Padding="0,8,0,0">
+                        <StackPanel>
+                            <TextBlock Text="节点属性" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                            <TextBlock Text="选中: 判断节点" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                            <TextBlock Text="条件表达式" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                            <TextBox Text="${result} == true" Margin="0,0,0,12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="保存" Style="{StaticResource ButtonPrimary}" Padding="16,4" Margin="0,0,8,0"/>
+                                <Button Content="验证" Padding="16,4"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

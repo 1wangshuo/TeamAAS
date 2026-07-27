@@ -1,0 +1,122 @@
+<UserControl x:Class="TeamAAS.Views.ParamsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="280"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: Categories -->
+        <Border Grid.Column="0" Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="8,12">
+                <TextBlock DockPanel.Dock="Top" Text="参数分类" FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,8"/>
+                <StackPanel>
+                    <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="6" Padding="12,8" Margin="0,2">
+                        <TextBlock Text="⚙ 产品参数" Foreground="White" FontSize="13"/>
+                    </Border>
+                    <Border Background="Transparent" CornerRadius="6" Padding="12,8" Margin="0,2">
+                        <TextBlock Text="📋 自定义参数" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13"/>
+                    </Border>
+                    <Border Background="Transparent" CornerRadius="6" Padding="12,8" Margin="0,2">
+                        <TextBlock Text="💻 系统参数" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13"/>
+                    </Border>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="8,0,8,8">
+                    <Button Content="导入" Padding="16,4" Margin="0,0,8,0"/>
+                    <Button Content="导出" Padding="16,4"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Center: Parameter Tables -->
+        <Grid Grid.Column="1" Margin="12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Product Parameters -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <TextBlock Text="产品参数" FontSize="14" FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="+ 添加" Style="{StaticResource ButtonPrimary}" Padding="12,4" Margin="0,0,4,0"/>
+                        <Button Content="删除" Padding="12,4"/>
+                    </StackPanel>
+                </DockPanel>
+                <DataGrid AutoGenerateColumns="False" CanUserAddRows="False"
+                          HeadersVisibility="All" GridLinesVisibility="Horizontal"
+                          BorderBrush="{DynamicResource BorderBrush}" RowHeight="32">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="编号" Width="50"/>
+                        <DataGridTextColumn Header="名称" Width="120"/>
+                        <DataGridTextColumn Header="类型" Width="70"/>
+                        <DataGridTextColumn Header="值" Width="100"/>
+                        <DataGridTextColumn Header="备注" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <!-- Custom Parameters -->
+            <DockPanel Grid.Row="1">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <TextBlock Text="自定义参数" FontSize="14" FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="+ 添加" Style="{StaticResource ButtonPrimary}" Padding="12,4" Margin="0,0,4,0"/>
+                        <Button Content="删除" Padding="12,4"/>
+                    </StackPanel>
+                </DockPanel>
+                <DataGrid AutoGenerateColumns="False" CanUserAddRows="False"
+                          HeadersVisibility="All" GridLinesVisibility="Horizontal"
+                          BorderBrush="{DynamicResource BorderBrush}" RowHeight="32">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="编号" Width="50"/>
+                        <DataGridTextColumn Header="名称" Width="100"/>
+                        <DataGridTextColumn Header="Param1" Width="80"/>
+                        <DataGridTextColumn Header="Param2" Width="80"/>
+                        <DataGridTextColumn Header="Param3" Width="80"/>
+                        <DataGridTextColumn Header="Param4" Width="80"/>
+                        <DataGridTextColumn Header="备注" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Grid>
+
+        <!-- Right: Details -->
+        <Border Grid.Column="2" Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
+            <DockPanel Margin="12,12">
+                <TextBlock DockPanel.Dock="Top" Text="参数详情" FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                <StackPanel>
+                    <TextBlock Text="参数名称" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBlock Text="PTP速度" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                    <TextBlock Text="参数类型" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBlock Text="数值" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                    <TextBlock Text="当前值" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBlock Text="20" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                    <TextBlock Text="取值范围" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBlock Text="1 - 100" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,12"/>
+                    <TextBlock Text="引用表达式" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <Border Background="{DynamicResource SecondaryRegionBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,0,12">
+                        <TextBlock Text="${PTP速度}" FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource PrimaryBrush}"/>
+                    </Border>
+                    <TextBlock Text="使用位置" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBlock Text="• 上料检测流程" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,2"/>
+                    <TextBlock Text="• 组装流程" FontSize="12" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,2"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button Content="保存" Style="{StaticResource ButtonPrimary}" Padding="16,4" Margin="0,0,8,0"/>
+                    <Button Content="重置" Padding="16,4"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
