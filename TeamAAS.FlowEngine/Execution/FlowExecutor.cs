@@ -13,10 +13,11 @@ namespace TeamAAS.FlowEditor.Execution
     /// <summary>
     /// 流程执行引擎 - 并行任务流模型
     /// 参考 VisionKit ToolManagement.cs 的执行模式：
-    /// 1. 无输入连线的节点是任务起点，并行启动
-    /// 2. 每个节点等待所有前驱节点完成后再运行
-    /// 3. 节点完成后，所有后继节点作为独立任务并行启动
-    /// 4. Decision 节点只启动匹配分支的后继节点
+    /// 1. 无输入连线的节点是任务起点，每个作为独立线程启动
+    /// 2. 每个节点等待所有前驱节点完成后再运行（IF判断除外）
+    /// 3. 节点完成后，启动后继节点为独立线程（fire-and-forget），自身立即返回
+    /// 4. Decision 节点只启动匹配分支的后继
+    /// 5. 主线程通过计数器等待所有节点完成
     /// </summary>
     public class FlowExecutor
     {
@@ -27,16 +28,13 @@ namespace TeamAAS.FlowEditor.Execution
         private readonly HashSet<string> _startedNodes = new HashSet<string>();
         private readonly object _startLock = new object();
 
+        /// <summary>正在运行的节点计数（主线程等待此计数归零）</summary>
+        private int _pendingCount = 0;
+        private readonly object _pendingLock = new object();
+
         public bool IsRunning { get; private set; }
 
-        /// <summary>
-        /// 节点状态变化事件（在UI线程触发）
-        /// </summary>
         public event Action<FlowNode> NodeStatusChanged;
-
-        /// <summary>
-        /// 执行完成事件（在UI线程触发）
-        /// </summary>
         public event Action<bool> ExecutionCompleted;
 
         public FlowExecutor(FlowGraph graph)
@@ -51,29 +49,36 @@ namespace TeamAAS.FlowEditor.Execution
         {
             _token = token;
             _startedNodes.Clear();
+            _pendingCount = 0;
             IsRunning = true;
 
             bool success = true;
 
-            await Task.Run(async () =>
+            await Task.Run(() =>
             {
                 try
                 {
-                    // 重置所有节点状态
                     ResetAllNodes();
 
-                    // 找到根节点（没有输入连线的节点）
                     var rootNodes = GetRootNodes();
-
                     if (rootNodes.Count == 0 && _graph.Nodes.Count > 0)
-                    {
-                        // 没有根节点但有节点（可能有环），取全部节点
                         rootNodes = _graph.Nodes.ToList();
+
+                    // 每个根节点作为独立线程启动
+                    foreach (var root in rootNodes)
+                    {
+                        StartNode(root);
                     }
 
-                    // 每个根节点作为独立任务并行启动
-                    var tasks = rootNodes.Select(n => RunNodeAsync(n)).ToList();
-                    await Task.WhenAll(tasks);
+                    // 等待所有节点完成（计数器归零）
+                    lock (_pendingLock)
+                    {
+                        while (_pendingCount > 0)
+                        {
+                            if (_token.IsCancellationRequested) break;
+                            Monitor.Wait(_pendingLock, 100);
+                        }
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -94,20 +99,47 @@ namespace TeamAAS.FlowEditor.Execution
         }
 
         /// <summary>
-        /// 运行单个节点（含等待前驱、执行、启动后继）
+        /// 启动一个节点为独立线程（fire-and-forget）
         /// </summary>
-        private async Task RunNodeAsync(FlowNode node)
+        private void StartNode(FlowNode node)
         {
-            // 防止多前驱重复启动同一后继
+            // 去重：多前驱可能同时尝试启动同一后继
             lock (_startLock)
             {
                 if (_startedNodes.Contains(node.NodeId)) return;
                 _startedNodes.Add(node.NodeId);
             }
 
+            // 计数+1
+            lock (_pendingLock) { _pendingCount++; }
+
+            // 每个节点独立线程运行，不等待
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await RunNodeAsync(node);
+                }
+                catch { }
+                finally
+                {
+                    // 计数-1，通知主线程
+                    lock (_pendingLock)
+                    {
+                        _pendingCount--;
+                        Monitor.Pulse(_pendingLock);
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// 运行单个节点：等待前驱 → 执行 → 启动后继
+        /// </summary>
+        private async Task RunNodeAsync(FlowNode node)
+        {
             if (_token.IsCancellationRequested) return;
 
-            // 获取前驱节点
             var predecessors = GetPredecessors(node);
 
             // 等待所有前驱节点完成
@@ -117,26 +149,20 @@ namespace TeamAAS.FlowEditor.Execution
                 {
                     if (_token.IsCancellationRequested) return;
 
-                    // 如果有前驱节点失败，跳过本节点
+                    // 前驱有失败 → 跳过本节点，但仍启动后继
                     if (predecessors.Any(p => p.Status == NodeRunStatus.Failed))
                     {
                         UpdateNodeStatus(node, NodeRunStatus.Skipped, 0);
-                        await StartSuccessorsAsync(node, null);
+                        StartSuccessors(node, null);
                         return;
                     }
 
-                    // 所有前驱节点都完成（Success 或 Skipped）则继续
+                    // 所有前驱完成（Success或Skipped）→ 继续运行
                     if (predecessors.All(p => p.Status == NodeRunStatus.Success || p.Status == NodeRunStatus.Skipped))
                         break;
 
-                    try
-                    {
-                        await Task.Delay(50, _token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        return;
-                    }
+                    try { await Task.Delay(50, _token); }
+                    catch (OperationCanceledException) { return; }
                 }
             }
 
@@ -144,15 +170,13 @@ namespace TeamAAS.FlowEditor.Execution
             if (!node.IsEnabled)
             {
                 UpdateNodeStatus(node, NodeRunStatus.Skipped, 0);
-                await StartSuccessorsAsync(node, null);
+                StartSuccessors(node, null);
                 return;
             }
 
             // 标记运行中
             UpdateNodeStatus(node, NodeRunStatus.Running, 0);
-
-            // 短暂延迟让UI能看到Running状态
-            Thread.Sleep(50);
+            Thread.Sleep(50); // 短暂延迟让UI能看到Running状态
 
             // 执行节点
             var sw = Stopwatch.StartNew();
@@ -176,7 +200,6 @@ namespace TeamAAS.FlowEditor.Execution
                 }
                 else
                 {
-                    // 无插件的节点直接标记成功
                     result = NodeRunStatus.Success;
                 }
             }
@@ -191,14 +214,14 @@ namespace TeamAAS.FlowEditor.Execution
             // 执行失败则不继续后续节点
             if (result == NodeRunStatus.Failed) return;
 
-            // 启动后继节点
-            await StartSuccessorsAsync(node, branchResult);
+            // 启动后继节点（fire-and-forget，不等待）
+            StartSuccessors(node, branchResult);
         }
 
         /// <summary>
-        /// 启动后继节点（每个后继作为独立并行任务）
+        /// 启动后继节点（每个后继作为独立线程，不等待）
         /// </summary>
-        private async Task StartSuccessorsAsync(FlowNode node, bool? branchResult)
+        private void StartSuccessors(FlowNode node, bool? branchResult)
         {
             var outgoing = _graph.Connections
                 .Where(c => c.SourceNodeId == node.NodeId)
@@ -213,21 +236,15 @@ namespace TeamAAS.FlowEditor.Execution
                 ).ToList();
             }
 
-            // 每个后继作为独立任务并行启动
-            var tasks = new List<Task>();
             foreach (var conn in outgoing)
             {
                 if (_token.IsCancellationRequested) break;
-
                 var target = _graph.GetNode(conn.TargetNodeId);
                 if (target != null)
                 {
-                    tasks.Add(RunNodeAsync(target));
+                    StartNode(target);
                 }
             }
-
-            if (tasks.Count > 0)
-                await Task.WhenAll(tasks);
         }
 
         /// <summary>
