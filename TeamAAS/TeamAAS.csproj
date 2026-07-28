@@ -44,5 +44,7 @@
     <ProjectReference Include="..\TeamAAS.Camera\TeamAAS.Camera.csproj" />
     <ProjectReference Include="..\TeamAAS.Control\TeamAAS.Control.csproj" />
     <ProjectReference Include="..\TeamAAS.Robot\TeamAAS.Robot.csproj" />
+    <ProjectReference Include="..\TeamAAS.FlowEngine\TeamAAS.FlowEngine.csproj" />
+    <ProjectReference Include="..\TeamAAS.Plugins\TeamAAS.Plugins.csproj" />
   </ItemGroup>
 </Project>
