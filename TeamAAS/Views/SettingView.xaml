@@ -41,10 +41,11 @@
 
         <!-- Jog按钮样式 -->
         <Style x:Key="JogButton" TargetType="Button">
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="Padding" Value="0,6"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="0,14"/>
+            <Setter Property="MinHeight" Value="48"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -73,7 +74,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource RegionBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
             <ColumnDefinition Width="*"/>
@@ -334,6 +335,8 @@
                                     <DataGridTextColumn Header="IP地址" Binding="{Binding IP}" Width="110"/>
                                     <DataGridTextColumn Header="端口" Binding="{Binding Port}" Width="60"/>
                                     <DataGridTextColumn Header="连接方式" Binding="{Binding ConnectType}" Width="80"/>
+                                    <DataGridTextColumn Header="结束符" Binding="{Binding Terminator}" Width="70"/>
+                                    <DataGridTextColumn Header="编码格式" Binding="{Binding DataEncoding}" Width="80"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
@@ -409,70 +412,78 @@
 
                             <!-- Jog方向按钮区 -->
                             <Border DockPanel.Dock="Top" Background="{DynamicResource SecondaryRegionBrush}"
-                                    CornerRadius="4" Padding="12" Margin="12,0,12,12">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                    CornerRadius="4" Padding="16" Margin="12,0,12,12">
+                                <StackPanel>
+                                    <!-- 空间轴 -->
+                                    <TextBlock Text="空间轴 (X / Y / Z)" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Row="0" Grid.Column="0" Content="X+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="X+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="0" Grid.Column="1" Content="Y+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="Y+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="0" Grid.Column="2" Content="Z+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="Z+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="0" Content="X-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="X-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="1" Content="Y-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="Y-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="2" Content="Z-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="Z-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                    </Grid>
 
-                                    <!-- 第一行: X+ X- Y+ Y- -->
-                                    <Button Grid.Row="0" Grid.Column="0" Content="X+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="X+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="0" Grid.Column="1" Content="X-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="X-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="0" Grid.Column="2" Content="Y+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="Y+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="0" Grid.Column="3" Content="Y-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="Y-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
+                                    <!-- 分隔线 -->
+                                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
 
-                                    <!-- 第二行: Z+ Z- U+ U- -->
-                                    <Button Grid.Row="1" Grid.Column="0" Content="Z+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="Z+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="1" Grid.Column="1" Content="Z-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="Z-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="1" Grid.Column="2" Content="U+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="U+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="1" Grid.Column="3" Content="U-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="U-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-
-                                    <!-- 第三行: V+ V- W+ W- -->
-                                    <Button Grid.Row="2" Grid.Column="0" Content="V+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="V+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="2" Grid.Column="1" Content="V-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="V-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="2" Grid.Column="2" Content="W+" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="W+"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                    <Button Grid.Row="2" Grid.Column="3" Content="W-" Style="{StaticResource JogButton}"
-                                            Command="{Binding JogCommand}" CommandParameter="W-"
-                                            IsEnabled="{Binding HasSelectedRobot}"/>
-                                </Grid>
+                                    <!-- 旋转轴 -->
+                                    <TextBlock Text="旋转轴 (U / V / W)" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Row="0" Grid.Column="0" Content="U+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="U+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="0" Grid.Column="1" Content="V+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="V+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="0" Grid.Column="2" Content="W+" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="W+"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="0" Content="U-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="U-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="1" Content="V-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="V-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                        <Button Grid.Row="1" Grid.Column="2" Content="W-" Style="{StaticResource JogButton}"
+                                                Command="{Binding JogCommand}" CommandParameter="W-"
+                                                IsEnabled="{Binding HasSelectedRobot}"/>
+                                    </Grid>
+                                </StackPanel>
                             </Border>
-
-                            <!-- 获取坐标按钮 -->
-                            <Button DockPanel.Dock="Bottom" Content="获取当前坐标" 
-                                    Command="{Binding GetRobotPosCommand}"
-                                    Style="{StaticResource ButtonDefault}" 
-                                    Padding="16,8" Margin="12,0,12,12"
-                                    IsEnabled="{Binding HasSelectedRobot}"/>
                         </DockPanel>
                     </Border>
                 </Grid>

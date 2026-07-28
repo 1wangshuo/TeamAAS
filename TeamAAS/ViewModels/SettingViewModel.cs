@@ -216,7 +216,7 @@ namespace TeamAAS.ViewModels
                 {
                     try
                     {
-                        if (_cameraService.ContainsCamera(info.Id))
+                        if (_cameraService.ContainsSN(info.SerialNumber))
                         {
                             MessageBox.Show($"相机 {info.CameraName} 已存在，跳过。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                             continue;
@@ -396,28 +396,27 @@ namespace TeamAAS.ViewModels
         #region 机器人功能
         private void AddRobot()
         {
-            var robotInfo = new RobotInfo
+            var dialog = new AddRobotDialog(Robots.Count)
             {
-                Id = Guid.NewGuid(),
-                RobotNo = Robots.Count + 1,
-                RobotName = $"机器人 {Robots.Count + 1}",
-                RobotBrand = RobotBrand.EPSON,
-                ConnectType = TCPConnectType.Client,
-                IP = "192.168.0.1",
-                Port = 3600,
-                StepDistance = 1.0
+                Owner = Application.Current.MainWindow
             };
 
-            try
+            if (dialog.ShowDialog() == true && dialog.Result != null)
             {
-                _robotService.CreateRobot(robotInfo.Id, robotInfo);
-                Robots.Add(robotInfo);
-                SelectedRobot = robotInfo;
-                ShowRobotMessage($"已添加 {robotInfo.RobotName}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"添加机器人失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                var robotInfo = dialog.Result;
+                robotInfo.RobotNo = Robots.Count + 1;
+
+                try
+                {
+                    _robotService.CreateRobot(robotInfo.Id, robotInfo);
+                    Robots.Add(robotInfo);
+                    SelectedRobot = robotInfo;
+                    ShowRobotMessage($"已添加 {robotInfo.RobotName}");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"添加机器人失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
