@@ -45,6 +45,24 @@
                     <hc:NumericUpDown x:Name="NumLoopCount" Minimum="1" Maximum="100000" Increment="1" DecimalPlaces="0" Width="200" HorizontalAlignment="Left"/>
                 </StackPanel>
 
+                <StackPanel x:Name="IfProperties" Visibility="Collapsed">
+                    <TextBlock Text="左值" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                    <hc:NumericUpDown x:Name="NumLeftValue" Minimum="-999999" Maximum="999999" Increment="1" DecimalPlaces="2" Width="200" HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="比较运算符" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,4"/>
+                    <ComboBox x:Name="CmbOperator" Width="200" HorizontalAlignment="Left">
+                        <ComboBoxItem Content=">" Tag=">"/>
+                        <ComboBoxItem Content="&lt;" Tag="&lt;"/>
+                        <ComboBoxItem Content=">=" Tag=">="/>
+                        <ComboBoxItem Content="&lt;=" Tag="&lt;="/>
+                        <ComboBoxItem Content="==" Tag="=="/>
+                        <ComboBoxItem Content="!=" Tag="!="/>
+                    </ComboBox>
+
+                    <TextBlock Text="右值" FontSize="13" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,4"/>
+                    <hc:NumericUpDown x:Name="NumRightValue" Minimum="-999999" Maximum="999999" Increment="1" DecimalPlaces="2" Width="200" HorizontalAlignment="Left"/>
+                </StackPanel>
+
                 <StackPanel x:Name="GenericProperties" Visibility="Collapsed">
                     <TextBlock Text="该节点类型的属性编辑器正在开发中..." FontSize="12" Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap"/>
                 </StackPanel>

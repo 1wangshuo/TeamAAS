@@ -254,6 +254,9 @@
                 <TextBlock x:Name="TxtZoom" Text="100%" FontSize="12"
                            Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0"/>
                 <Button Content="适应内容" Width="60" Height="24" Click="FitView_Click" ToolTip="缩放至所有节点可见"/>
+                <Separator Margin="8,4"/>
+                <Button x:Name="BtnRun" Content="▶ 运行" Width="60" Height="24" Click="RunFlow_Click" ToolTip="运行流程"/>
+                <Button x:Name="BtnStop" Content="■ 停止" Width="60" Height="24" Click="StopFlow_Click" ToolTip="停止运行" Margin="2,0,0,0" IsEnabled="False"/>
             </StackPanel>
         </Border>
 

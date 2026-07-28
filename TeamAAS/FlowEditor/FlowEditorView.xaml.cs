@@ -103,6 +103,26 @@ namespace TeamAAS.FlowEditor
         }
         #endregion
 
+        #region 流程执行
+        private async void RunFlow_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vm == null || _vm.IsRunning) return;
+
+            BtnRun.IsEnabled = false;
+            BtnStop.IsEnabled = true;
+
+            await _vm.RunFlowAsync();
+
+            BtnRun.IsEnabled = true;
+            BtnStop.IsEnabled = false;
+        }
+
+        private void StopFlow_Click(object sender, RoutedEventArgs e)
+        {
+            _vm?.StopFlow();
+        }
+        #endregion
+
         #region 属性编辑
         private void EditProperties_Click(object sender, RoutedEventArgs e)
         {

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using TeamAAS.FlowEditor.Models;
 
 namespace TeamAAS.FlowEditor.Views
@@ -28,6 +29,7 @@ namespace TeamAAS.FlowEditor.Views
         {
             SleepProperties.Visibility = Visibility.Collapsed;
             LoopProperties.Visibility = Visibility.Collapsed;
+            IfProperties.Visibility = Visibility.Collapsed;
             GenericProperties.Visibility = Visibility.Collapsed;
 
             if (node.PluginId == "sleep")
@@ -40,6 +42,36 @@ namespace TeamAAS.FlowEditor.Views
                     else if (val != null && int.TryParse(val.ToString(), out var parsed)) duration = parsed;
                 }
                 NumDuration.Value = duration;
+            }
+            else if (node.PluginId == "if")
+            {
+                IfProperties.Visibility = Visibility.Visible;
+
+                double left = 0, right = 0;
+                string op = ">";
+
+                if (node.Properties != null)
+                {
+                    if (node.Properties.TryGetValue("LeftValue", out var lv) && lv != null)
+                        double.TryParse(lv.ToString(), out left);
+                    if (node.Properties.TryGetValue("RightValue", out var rv) && rv != null)
+                        double.TryParse(rv.ToString(), out right);
+                    if (node.Properties.TryGetValue("Operator", out var ov) && ov != null)
+                        op = ov.ToString();
+                }
+
+                NumLeftValue.Value = left;
+                NumRightValue.Value = right;
+
+                // 选择对应的运算符
+                for (int i = 0; i < CmbOperator.Items.Count; i++)
+                {
+                    if (CmbOperator.Items[i] is ComboBoxItem item && (string)item.Tag == op)
+                    {
+                        CmbOperator.SelectedIndex = i;
+                        break;
+                    }
+                }
             }
             else if (node.PluginId == "forloop")
             {
@@ -67,6 +99,13 @@ namespace TeamAAS.FlowEditor.Views
             if (_node.PluginId == "sleep")
             {
                 _node.Properties["Duration"] = (int)NumDuration.Value;
+            }
+            else if (_node.PluginId == "if")
+            {
+                _node.Properties["LeftValue"] = NumLeftValue.Value;
+                _node.Properties["RightValue"] = NumRightValue.Value;
+                if (CmbOperator.SelectedItem is ComboBoxItem item)
+                    _node.Properties["Operator"] = item.Tag?.ToString() ?? ">";
             }
             else if (_node.PluginId == "forloop")
             {

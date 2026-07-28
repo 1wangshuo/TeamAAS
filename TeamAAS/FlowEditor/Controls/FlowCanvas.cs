@@ -926,7 +926,7 @@ namespace TeamAAS.FlowEditor.Controls
             {
                 var str = e.Data.GetData(DataFormats.StringFormat) as string;
                 if (!string.IsNullOrEmpty(str))
-                    pluginInfo = FlowEditorViewModel.FindPluginInfo(str);
+                    pluginInfo = PluginManager.GetPluginInfo(str);
             }
 
             if (pluginInfo != null)
