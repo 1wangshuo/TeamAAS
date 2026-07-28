@@ -1269,12 +1269,8 @@ namespace TeamAAS.FlowEditor.Controls
             var layer = System.Windows.Documents.AdornerLayer.GetAdornerLayer(this);
             if (layer == null) return;
 
-            // 将画布坐标转为屏幕坐标（考虑 RenderTransform）
-            var transform = RenderTransform;
-            var p1 = transform.Transform(start);
-            var p2 = transform.Transform(end);
-
-            var line = new SelectionAlignLine(this, p1, p2);
+            // Adorner 坐标空间与画布布局坐标空间一致，直接传画布坐标
+            var line = new SelectionAlignLine(this, start, end);
             layer.Add(line);
             _alignLines.Add(line);
         }

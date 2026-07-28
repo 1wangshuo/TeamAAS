@@ -61,15 +61,19 @@ namespace TeamAAS.FlowEditor.Models
         /// </summary>
         public bool TryAddConnection(FlowConnection connection)
         {
-            // 检查重复 — 同一对节点之间不允许重复连线
+            // 不允许自连接
+            if (connection.SourceNodeId == connection.TargetNodeId)
+                return false;
+
+            // 检查重复 — 同一对节点之间不允许连线（双向检查，防止反向连接）
             foreach (var conn in Connections)
             {
-                if (conn.SourceNodeId == connection.SourceNodeId &&
-                    conn.TargetNodeId == connection.TargetNodeId)
+                if ((conn.SourceNodeId == connection.SourceNodeId && conn.TargetNodeId == connection.TargetNodeId) ||
+                    (conn.SourceNodeId == connection.TargetNodeId && conn.TargetNodeId == connection.SourceNodeId))
                     return false;
             }
 
-            // 检查是否形成环
+            // 检查是否形成环（多级链路：A→B→C 后不允许 C→A）
             if (WouldCreateCycle(connection.SourceNodeId, connection.TargetNodeId))
                 return false;
 
