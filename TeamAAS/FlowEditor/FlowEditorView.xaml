@@ -1,0 +1,414 @@
+<UserControl x:Class="TeamAAS.FlowEditor.FlowEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
+             xmlns:fe="clr-namespace:TeamAAS.FlowEditor.Controls">
+
+    <UserControl.Resources>
+        <!-- 画布网格背景（透明底 + 浅灰网格线，叠加在 SecondaryBorderBrush 上） -->
+        <DrawingBrush x:Key="GridBrush" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{DynamicResource SecondaryBorderBrush}"  Thickness="0.5"/>
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!-- MoveThumb 透明模板 -->
+        <Style TargetType="{x:Type fe:MoveThumb}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type fe:MoveThumb}">
+                        <Rectangle Fill="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ConnectorControl 连接点样式 -->
+        <Style TargetType="{x:Type fe:ConnectorControl}">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Cursor" Value="Cross"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type fe:ConnectorControl}">
+                        <Grid Width="14" Height="14">
+                            <Ellipse Fill="Transparent" Margin="-8"/>
+                            <Ellipse Width="10" Height="10"
+                                     Fill="{DynamicResource PrimaryBrush}"
+                                     Stroke="#FFFFFF" StrokeThickness="1.5"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- NodeControl 节点样式 -->
+        <Style TargetType="{x:Type fe:NodeControl}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type fe:NodeControl}">
+                        <Grid>
+                            <!-- ========== 矩形节点（Normal/ToolBlock） ========== -->
+                            <Border x:Name="RectNode" CornerRadius="4"
+                                    BorderBrush="{DynamicResource PrimaryBrush}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource RegionBrush}"
+                                    MinHeight="35"
+                                    ClipToBounds="True">
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- 左侧色条 + 图标 -->
+                                    <Border Background="{DynamicResource PrimaryBrush}"
+                                            CornerRadius="3,0,0,3" Width="32">
+                                        <Path Width="16" Height="16" Stretch="Uniform"
+                                              Data="{Binding IconGeometry}" Fill="White"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                    </Border>
+                                    <!-- 中间：名称 + 耗时 -->
+                                    <StackPanel VerticalAlignment="Center" Margin="8,0,8,0" MinWidth="100">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding NodeName}"
+                                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                                       FontSize="13"
+                                                       FontFamily="Microsoft YaHei"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding CostTimeText}"
+                                                       MinWidth="20"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"
+                                                       Margin="8,0,0,0"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <!-- 右侧色条 + 状态圆 -->
+                                    <Border Background="{DynamicResource PrimaryBrush}"
+                                            CornerRadius="0,3,3,0" Width="20">
+                                        <Ellipse Width="10" Height="10"
+                                                 Fill="{Binding StatusColor}"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ========== 循环节点（ForLoop） ========== -->
+                            <Border x:Name="LoopNode" Visibility="Collapsed"
+                                    MinWidth="200" MinHeight="35"
+                                    CornerRadius="4"
+                                    BorderBrush="{DynamicResource DarkInfoBrush}"
+                                    BorderThickness="0"
+                                    Background="{DynamicResource RegionBrush}"
+                                    ClipToBounds="True">
+                                <StackPanel>
+                                    <!-- 头部色条 -->
+                                    <Border Background="{DynamicResource DarkInfoBrush}"
+                                            CornerRadius="3,3,0,0" Padding="8,4">
+                                        <TextBlock Text="循环" Foreground="White"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   FontFamily="Microsoft YaHei"/>
+                                    </Border>
+                                    <!-- 内容 -->
+                                    <StackPanel Orientation="Horizontal" Margin="8,6,6,6">
+                                        <Path Width="14" Height="14" Stretch="Uniform"
+                                              Data="{Binding IconGeometry}"
+                                              Fill="{DynamicResource DarkInfoBrush}"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding NodeName}"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   FontSize="13"
+                                                   FontFamily="Microsoft YaHei"
+                                                   Margin="6,0,0,0"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding CostTimeText}"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" FontSize="11"
+                                                   Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ========== 菱形节点（Decision） ========== -->
+                            <Grid x:Name="DiamondNode" Visibility="Collapsed"
+                                  Width="160" Height="100">
+                                <Path x:Name="DiamondPath"
+                                      Data="M0.5,0 L1,0.5 L0.5,1 L0,0.5 Z"
+                                      Stretch="Fill"
+                                      Fill="{DynamicResource RegionBrush}"
+                                      Stroke="{DynamicResource DarkWarningBrush}"
+                                      StrokeThickness="1.5"/>
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="24,16">
+                                    <TextBlock Text="{Binding NodeName}"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"
+                                               FontSize="12"
+                                               FontFamily="Microsoft YaHei"
+                                               HorizontalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding CostTimeText}"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" FontSize="10"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- 拖拽手柄 -->
+                            <fe:MoveThumb Cursor="Hand" Panel.ZIndex="1"/>
+
+                            <!-- 连接点容器（常驻可见，悬停高亮） -->
+                            <Grid x:Name="ConnectorContainer"
+                                  Opacity="0.5" Panel.ZIndex="2">
+                                <!-- 左 -->
+                                <fe:ConnectorControl PortIndex="0" Side="Left"
+                                                     VerticalAlignment="Center"
+                                                     HorizontalAlignment="Left"
+                                                     Margin="-7,0,0,0"/>
+                                <!-- 右 -->
+                                <fe:ConnectorControl PortIndex="1" Side="Right"
+                                                     VerticalAlignment="Center"
+                                                     HorizontalAlignment="Right"
+                                                     Margin="0,0,-7,0"/>
+                                <!-- 上 -->
+                                <fe:ConnectorControl PortIndex="2" Side="Top"
+                                                     VerticalAlignment="Top"
+                                                     HorizontalAlignment="Center"
+                                                     Margin="0,-7,0,0"/>
+                                <!-- 下 -->
+                                <fe:ConnectorControl PortIndex="3" Side="Bottom"
+                                                     VerticalAlignment="Bottom"
+                                                     HorizontalAlignment="Center"
+                                                     Margin="0,0,0,-7"/>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <!-- 悬停：高亮连接点 -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ConnectorContainer" Property="Opacity" Value="1"/>
+                                <Setter TargetName="RectNode" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="LoopNode" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="DiamondPath" Property="StrokeThickness" Value="2.5"/>
+                            </Trigger>
+                            <!-- 选中：加粗边框 -->
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="RectNode" Property="BorderThickness" Value="2.5"/>
+                                <Setter TargetName="LoopNode" Property="BorderThickness" Value="2.5"/>
+                                <Setter TargetName="DiamondPath" Property="StrokeThickness" Value="3"/>
+                            </DataTrigger>
+                            <!-- Decision → 菱形 -->
+                            <DataTrigger Binding="{Binding Category}" Value="Decision">
+                                <Setter TargetName="RectNode" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="LoopNode" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="DiamondNode" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <!-- ForLoop → 循环头 -->
+                            <DataTrigger Binding="{Binding Category}" Value="ForLoop">
+                                <Setter TargetName="RectNode" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="LoopNode" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="DiamondNode" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 工具箱项样式 -->
+        <Style x:Key="ToolboxItem" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource SecondaryBorderBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏 -->
+        <Border Grid.Row="0" Height="36"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                <TextBlock Text="流程编辑" FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <Button Content="+" Width="28" Height="24" Click="ZoomIn_Click" ToolTip="放大"/>
+                <Button Content="−" Width="28" Height="24" Click="ZoomOut_Click" ToolTip="缩小" Margin="2,0"/>
+                <TextBlock x:Name="TxtZoom" Text="100%" FontSize="12"
+                           Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                <Button Content="适应内容" Width="60" Height="24" Click="FitView_Click" ToolTip="缩放至所有节点可见"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 主内容区: 工具箱 + 画布 + 属性 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="220"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左: 工具箱 -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="节点工具箱" FontSize="13"
+                               FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="12,8,0,4"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding ToolboxGroups}" Margin="4,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="4,2">
+                                        <TextBlock Text="{Binding GroupName}" FontSize="11"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="4,4,0,2"/>
+                                        <ItemsControl ItemsSource="{Binding Items}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{StaticResource ToolboxItem}"
+                                                            MouseLeftButtonDown="ToolboxItem_MouseLeftButtonDown"
+                                                            MouseMove="ToolboxItem_MouseMove">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Path Width="14" Height="14" Stretch="Uniform"
+                                                                  Data="{Binding IconGeometry}"
+                                                                  Fill="{DynamicResource PrimaryTextBrush}"
+                                                                  VerticalAlignment="Center"/>
+                                                            <StackPanel Margin="8,0,0,0">
+                                                                <TextBlock Text="{Binding DisplayName}"
+                                                                           FontSize="12"
+                                                                           Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                                                <TextBlock Text="{Binding Description}"
+                                                                           FontSize="10"
+                                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- 中: 画布 + 鸟瞰图 -->
+            <Grid Grid.Column="1" Background="{DynamicResource SecondaryRegionBrush}" ClipToBounds="True">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              Background="{DynamicResource SecondaryRegionBrush}">
+                    <fe:FlowCanvas x:Name="EditorCanvas"
+                                   Background="{StaticResource GridBrush}"/>
+                </ScrollViewer>
+                <!-- 鸟瞰图（右下角叠加） -->
+                <fe:MinimapControl x:Name="Minimap"
+                                   Width="200" Height="140"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Bottom"
+                                   Margin="0,0,8,8"
+                                   Canvas="{Binding ElementName=EditorCanvas}"/>
+            </Grid>
+
+            <!-- 右: 流程属性 -->
+            <Border Grid.Column="2"
+                    Background="{DynamicResource RegionBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="流程属性" FontSize="13"
+                               FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="12,8,0,4"/>
+                    <StackPanel Margin="12,4">
+                        <!-- 节点名称 -->
+                        <TextBlock Text="节点名称" FontSize="11"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,2"/>
+                        <TextBlock Text="{Binding SelectedNode.NodeName}" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+
+                        <!-- 节点类型 -->
+                        <TextBlock Text="节点类型" FontSize="11"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
+                        <TextBlock Text="{Binding SelectedNode.Category}" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+
+                        <!-- 耗时 -->
+                        <TextBlock Text="耗时" FontSize="11"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
+                        <TextBlock Text="{Binding SelectedNode.CostTimeText}" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+
+                        <!-- 配置属性 -->
+                        <TextBlock Text="配置属性" FontSize="11"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
+                        <TextBlock Text="{Binding SelectedNode.PropertySummary}" FontSize="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+
+                        <!-- 位置信息 -->
+                        <TextBlock Text="位置" FontSize="11"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource PrimaryTextBrush}">
+                            <Run Text="X: "/>
+                            <Run Text="{Binding SelectedNode.X, Mode=OneWay}"/>
+                            <Run Text=", Y: "/>
+                            <Run Text="{Binding SelectedNode.Y, Mode=OneWay}"/>
+                        </TextBlock>
+
+                        <!-- 操作按钮 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                            <Button Content="编辑属性" Padding="12,4" Click="EditProperties_Click" Margin="0,0,8,0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedNode}" Value="{x:Null}">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- 操作提示 -->
+                        <Border Background="{DynamicResource RegionBrush}" CornerRadius="4" Padding="8" Margin="0,24,0,0">
+                            <StackPanel>
+                                <TextBlock Text="操作提示" FontSize="11"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="拖拽工具箱项到画布创建节点" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,2"/>
+                                <TextBlock Text="拖拽节点端口绘制连线" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                <TextBlock Text="上下左右四个端口均可连线" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                <TextBlock Text="双击节点编辑属性" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                <TextBlock Text="滚轮缩放 | 中键拖拽平移" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                <TextBlock Text="Delete 删除选中项" FontSize="10"
+                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

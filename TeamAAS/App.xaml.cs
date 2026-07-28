@@ -7,6 +7,7 @@ using TeamAAS.Robot.Interfaces;
 using TeamAAS.Robot.Services;
 using TeamAAS.ViewModels;
 using TeamAAS.Views;
+using TeamAAS.FlowEditor;
 
 namespace TeamAAS
 {
@@ -32,6 +33,7 @@ namespace TeamAAS
             containerRegistry.RegisterForNavigation<ProductView>("ProductView");
             containerRegistry.RegisterForNavigation<DebugView>("DebugView");
             containerRegistry.RegisterForNavigation<SettingView>("SettingView");
+            containerRegistry.RegisterForNavigation<FlowEditorView>("FlowEditorView");
             containerRegistry.RegisterForNavigation<CalibrationView>("CalibrationView");
             containerRegistry.RegisterForNavigation<StatisticsView>("StatisticsView");
             containerRegistry.RegisterForNavigation<ParamsView>("ParamsView");
