@@ -574,12 +574,10 @@ namespace TeamAAS.FlowEditor.Controls
         #endregion
 
         #region 左键交互
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseLeftButtonDown(e);
-            Focus();
 
-            // 双击检测（Canvas 不继承 Control，无 OnMouseDoubleClick）
+        // 双击检测用 Preview（隧道事件），在 MoveThumb 捕获鼠标之前触发
+        protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
             if (e.ClickCount == 2)
             {
                 var dblNode = FindAncestor<NodeControl>(e.OriginalSource as DependencyObject);
@@ -590,6 +588,13 @@ namespace TeamAAS.FlowEditor.Controls
                     return;
                 }
             }
+            base.OnPreviewMouseLeftButtonDown(e);
+        }
+
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonDown(e);
+            Focus();
 
             var pos = e.GetPosition(this);
             var src = e.OriginalSource as DependencyObject;

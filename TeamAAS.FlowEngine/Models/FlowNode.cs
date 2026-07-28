@@ -239,6 +239,7 @@ namespace TeamAAS.FlowEditor.Models
         {
             RaisePropertyChanged(nameof(StatusText));
             RaisePropertyChanged(nameof(StatusColor));
+            RaisePropertyChanged(nameof(CostTimeText));
             RaisePropertyChanged(nameof(PropertySummary));
         }
         #endregion
