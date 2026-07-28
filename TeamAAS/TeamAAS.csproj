@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	  <OutputType>WinExe</OutputType>
@@ -12,6 +12,8 @@
 	  <ApplicationManifest>app.manifest</ApplicationManifest>
 	  <SatelliteResourceLanguages>zh-CN</SatelliteResourceLanguages>
 	  <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+	  <Platforms>x64</Platforms>
+	  <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,8 +21,28 @@
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <VisionProRoot Condition="Exists('C:\Program Files\Cognex\VisionPro')">C:\Program Files\Cognex\VisionPro</VisionProRoot>
+    <VisionProRoot Condition="'$(VisionProRoot)' == '' AND Exists('C:\Program Files (x86)\Cognex\VisionPro')">C:\Program Files (x86)\Cognex\VisionPro</VisionProRoot>
+    <ReferencePath>$(VisionProRoot)\ReferencedAssemblies;$(VisionProRoot)\CogPlus;$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Cognex.VisionPro">
+      <HintPath>$(VisionProRoot)\ReferencedAssemblies\Cognex.VisionPro.dll</HintPath>
+    </Reference>
+    <Reference Include="Cognex.VisionPro.Core">
+      <HintPath>$(VisionProRoot)\ReferencedAssemblies\Cognex.VisionPro.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TeamAAS.Camera\TeamAAS.Camera.csproj" />
+    <ProjectReference Include="..\TeamAAS.Control\TeamAAS.Control.csproj" />
+    <ProjectReference Include="..\TeamAAS.Robot\TeamAAS.Robot.csproj" />
+  </ItemGroup>
 </Project>
