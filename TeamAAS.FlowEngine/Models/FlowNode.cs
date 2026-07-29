@@ -1,10 +1,20 @@
 using Prism.Mvvm;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
 
 namespace TeamAAS.FlowEditor.Models
 {
+    /// <summary>
+    /// 执行结果项（UI展示用）
+    /// </summary>
+    public class ResultItem
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+        public string TypeName { get; set; }
+    }
     /// <summary>
     /// 流程节点基类 - 所有节点类型的公共属性
     /// </summary>
@@ -77,6 +87,36 @@ namespace TeamAAS.FlowEditor.Models
         /// 节点配置属性（由插件定义，如休眠时间、循环次数等）
         /// </summary>
         public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
+        #endregion
+
+        #region 执行结果
+        private ObservableCollection<ResultItem> _resultItems = new ObservableCollection<ResultItem>();
+        public ObservableCollection<ResultItem> ResultItems
+        {
+            get => _resultItems;
+            set => SetProperty(ref _resultItems, value);
+        }
+
+        /// <summary>
+        /// 设置执行结果（UI线程调用）
+        /// </summary>
+        public void SetResults(Dictionary<string, object> results)
+        {
+            _resultItems.Clear();
+            if (results != null)
+            {
+                foreach (var kv in results)
+                {
+                    _resultItems.Add(new ResultItem
+                    {
+                        Key = kv.Key,
+                        Value = kv.Value?.ToString() ?? "",
+                        TypeName = kv.Value?.GetType().Name ?? "null"
+                    });
+                }
+            }
+            RaisePropertyChanged(nameof(ResultItems));
+        }
         #endregion
 
         #region UI辅助属性
@@ -241,6 +281,7 @@ namespace TeamAAS.FlowEditor.Models
             RaisePropertyChanged(nameof(StatusColor));
             RaisePropertyChanged(nameof(CostTimeText));
             RaisePropertyChanged(nameof(PropertySummary));
+            RaisePropertyChanged(nameof(ResultItems));
         }
         #endregion
 

@@ -40,7 +40,7 @@ namespace TeamAAS.FlowEditor.Plugins
             return node;
         }
 
-        public NodeRunStatus Execute(Dictionary<string, object> properties)
+        public NodeExecuteResult Execute(Dictionary<string, object> properties)
         {
             int duration = 1000;
             if (properties != null && properties.TryGetValue("Duration", out var val))
@@ -54,7 +54,15 @@ namespace TeamAAS.FlowEditor.Plugins
             if (duration > 0)
                 Thread.Sleep(duration);
 
-            return NodeRunStatus.Success;
+            return new NodeExecuteResult
+            {
+                Status = NodeRunStatus.Success,
+                Results = new Dictionary<string, object>
+                {
+                    { "休眠时间(ms)", duration },
+                    { "实际耗时(ms)", duration }
+                }
+            };
         }
     }
 }

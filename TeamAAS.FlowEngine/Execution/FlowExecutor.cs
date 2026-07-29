@@ -12,7 +12,6 @@ namespace TeamAAS.FlowEditor.Execution
 {
     /// <summary>
     /// 流程执行引擎 - 并行任务流模型
-    /// 参考 VisionKit ToolManagement.cs 的执行模式：
     /// 1. 无输入连线的节点是任务起点，每个作为独立线程启动
     /// 2. 每个节点等待所有前驱节点完成后再运行（IF判断除外）
     /// 3. 节点完成后，启动后继节点为独立线程（fire-and-forget），自身立即返回
@@ -183,12 +182,15 @@ namespace TeamAAS.FlowEditor.Execution
             NodeRunStatus result;
             bool? branchResult = null;
 
+            Dictionary<string, object> execResults = null;
             try
             {
                 var plugin = PluginManager.GetPlugin(node.PluginId);
                 if (plugin != null)
                 {
-                    result = plugin.Execute(node.Properties);
+                    var execResult = plugin.Execute(node.Properties);
+                    result = execResult.Status;
+                    execResults = execResult.Results;
 
                     // Decision节点获取分支结果
                     if (node.Category == NodeCategory.Decision &&
@@ -210,6 +212,15 @@ namespace TeamAAS.FlowEditor.Execution
 
             sw.Stop();
             UpdateNodeStatus(node, result, (int)sw.ElapsedMilliseconds);
+
+            // 存储执行结果到节点（UI线程更新）
+            if (execResults != null && execResults.Count > 0)
+            {
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    node.SetResults(execResults);
+                });
+            }
 
             // 执行失败则不继续后续节点
             if (result == NodeRunStatus.Failed) return;
@@ -302,6 +313,7 @@ namespace TeamAAS.FlowEditor.Execution
             {
                 foreach (var node in _graph.Nodes)
                 {
+                    node.ResultItems.Clear();
                     node.NotifyStatusChanged();
                 }
             });

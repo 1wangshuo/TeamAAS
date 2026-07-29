@@ -575,7 +575,7 @@ namespace TeamAAS.FlowEditor.Controls
 
         #region 左键交互
 
-        // 双击检测用 Preview（隧道事件），在 MoveThumb 捕获鼠标之前触发
+        // 双击检测 + 单击选中都用 Preview（隧道事件），在 MoveThumb 捕获鼠标之前触发
         protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -586,6 +586,17 @@ namespace TeamAAS.FlowEditor.Controls
                     NodeDoubleClicked?.Invoke(dblNode.GetNode());
                     e.Handled = true;
                     return;
+                }
+            }
+            else if (e.ClickCount == 1)
+            {
+                // 单击节点选中（在 MoveThumb 捕获鼠标之前处理）
+                var nodeCtrl = FindAncestor<NodeControl>(e.OriginalSource as DependencyObject);
+                if (nodeCtrl != null)
+                {
+                    bool isCtrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+                    SelectNode(nodeCtrl.GetNode(), isCtrl);
+                    // 不设 Handled，让 MoveThumb 继续处理拖拽
                 }
             }
             base.OnPreviewMouseLeftButtonDown(e);

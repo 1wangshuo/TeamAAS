@@ -332,52 +332,84 @@
                                    Canvas="{Binding ElementName=EditorCanvas}"/>
             </Grid>
 
-            <!-- 右: 流程属性 -->
+            <!-- 右: 节点信息 + 执行结果 -->
             <Border Grid.Column="2"
                     Background="{DynamicResource RegionBrush}"
                     BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,0,0,0">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="流程属性" FontSize="13"
+                    <TextBlock DockPanel.Dock="Top" Text="节点信息" FontSize="13"
                                FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="12,8,0,4"/>
-                    <StackPanel Margin="12,4">
-                        <!-- 节点名称 -->
-                        <TextBlock Text="节点名称" FontSize="11"
-                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,2"/>
-                        <TextBlock Text="{Binding SelectedNode.NodeName}" FontSize="12"
-                                   Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="12,4">
+                            <!-- 节点名称 -->
+                            <TextBlock Text="名称" FontSize="11"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,2"/>
+                            <TextBlock Text="{Binding SelectedNode.NodeName}" FontSize="12"
+                                       Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
 
-                        <!-- 节点类型 -->
-                        <TextBlock Text="节点类型" FontSize="11"
-                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
-                        <TextBlock Text="{Binding SelectedNode.Category}" FontSize="12"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <!-- 类型 + 状态 -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="类型" FontSize="11"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <TextBlock Text="{Binding SelectedNode.Category}" FontSize="12"
+                                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="状态" FontSize="11"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,2"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="8" Height="8" Fill="{Binding SelectedNode.StatusColor}" Margin="0,0,4,0"/>
+                                        <TextBlock Text="{Binding SelectedNode.StatusText}" FontSize="12"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
 
-                        <!-- 耗时 -->
-                        <TextBlock Text="耗时" FontSize="11"
-                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
-                        <TextBlock Text="{Binding SelectedNode.CostTimeText}" FontSize="12"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            <!-- 耗时 -->
+                            <TextBlock Text="耗时" FontSize="11"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,8,0,2"/>
+                            <TextBlock Text="{Binding SelectedNode.CostTimeText}" FontSize="12"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"/>
 
-                        <!-- 配置属性 -->
-                        <TextBlock Text="配置属性" FontSize="11"
-                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
-                        <TextBlock Text="{Binding SelectedNode.PropertySummary}" FontSize="12"
-                                   Foreground="{DynamicResource PrimaryTextBrush}" TextWrapping="Wrap"/>
+                            <!-- 执行结果表格 -->
+                            <TextBlock Text="执行结果" FontSize="11"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,4"/>
+                            <DataGrid ItemsSource="{Binding SelectedNode.ResultItems}"
+                                      AutoGenerateColumns="False"
+                                      HeadersVisibility="Column"
+                                      IsReadOnly="True"
+                                      GridLinesVisibility="Horizontal"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserResizeColumns="True"
+                                      SelectionMode="Single"
+                                      SelectionUnit="Cell"
+                                      ClipboardCopyMode="ExcludeHeader"
+                                      BorderThickness="1"
+                                      BorderBrush="{DynamicResource BorderBrush}"
+                                      Background="{DynamicResource RegionBrush}"
+                                      RowBackground="{DynamicResource RegionBrush}"
+                                      AlternatingRowBackground="{DynamicResource SecondaryRegionBrush}"
+                                      ColumnHeaderHeight="24"
+                                      RowHeight="24"
+                                      FontSize="11"
+                                      MaxHeight="300">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="键" Binding="{Binding Key}" Width="*"/>
+                                    <DataGridTextColumn Header="值" Binding="{Binding Value}" Width="2*"/>
+                                    <DataGridTextColumn Header="类型" Binding="{Binding TypeName}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <TextBlock Text="选中单元格按 Ctrl+C 复制" FontSize="10"
+                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
 
-                        <!-- 位置信息 -->
-                        <TextBlock Text="位置" FontSize="11"
-                                   Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,2"/>
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource PrimaryTextBrush}">
-                            <Run Text="X: "/>
-                            <Run Text="{Binding SelectedNode.X, Mode=OneWay}"/>
-                            <Run Text=", Y: "/>
-                            <Run Text="{Binding SelectedNode.Y, Mode=OneWay}"/>
-                        </TextBlock>
-
-                        <!-- 操作按钮 -->
-                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                            <Button Content="编辑属性" Padding="12,4" Click="EditProperties_Click" Margin="0,0,8,0">
+                            <!-- 编辑属性按钮 -->
+                            <Button Content="编辑属性" Padding="12,4" Click="EditProperties_Click" Margin="0,16,0,0">
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Style.Triggers>
@@ -388,28 +420,22 @@
                                     </Style>
                                 </Button.Style>
                             </Button>
-                        </StackPanel>
 
-                        <!-- 操作提示 -->
-                        <Border Background="{DynamicResource RegionBrush}" CornerRadius="4" Padding="8" Margin="0,24,0,0">
-                            <StackPanel>
-                                <TextBlock Text="操作提示" FontSize="11"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBlock Text="拖拽工具箱项到画布创建节点" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,2"/>
-                                <TextBlock Text="拖拽节点端口绘制连线" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
-                                <TextBlock Text="上下左右四个端口均可连线" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
-                                <TextBlock Text="双击节点编辑属性" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
-                                <TextBlock Text="滚轮缩放 | 中键拖拽平移" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
-                                <TextBlock Text="Delete 删除选中项" FontSize="10"
-                                           Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                            <!-- 操作提示 -->
+                            <Border Background="{DynamicResource SecondaryRegionBrush}" CornerRadius="4" Padding="8" Margin="0,20,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="操作提示" FontSize="11"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="拖拽工具箱项到画布创建节点" FontSize="10"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" TextWrapping="Wrap" Margin="0,2"/>
+                                    <TextBlock Text="拖拽端口连线 | 双击编辑属性" FontSize="10"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                    <TextBlock Text="滚轮缩放 | 中键平移 | Del删除" FontSize="10"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,2"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
                 </DockPanel>
             </Border>
         </Grid>

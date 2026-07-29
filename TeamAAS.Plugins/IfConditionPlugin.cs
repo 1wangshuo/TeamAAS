@@ -62,7 +62,7 @@ namespace TeamAAS.FlowEditor.Plugins
             return node;
         }
 
-        public NodeRunStatus Execute(Dictionary<string, object> properties)
+        public NodeExecuteResult Execute(Dictionary<string, object> properties)
         {
             double left = 0, right = 0;
             string op = ">";
@@ -92,7 +92,17 @@ namespace TeamAAS.FlowEditor.Plugins
             // 存储分支结果供执行引擎使用
             properties["__BranchResult"] = result;
 
-            return NodeRunStatus.Success;
+            return new NodeExecuteResult
+            {
+                Status = NodeRunStatus.Success,
+                Results = new Dictionary<string, object>
+                {
+                    { "左值", left },
+                    { "运算符", op },
+                    { "右值", right },
+                    { "判断结果", result }
+                }
+            };
         }
     }
 }
