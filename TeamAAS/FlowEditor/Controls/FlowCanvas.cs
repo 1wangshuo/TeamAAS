@@ -523,10 +523,17 @@ namespace TeamAAS.FlowEditor.Controls
                 ZoomAt(mousePos, _scale.ScaleX * factor);
                 e.Handled = true;
             }
+            else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            {
+                // Shift + 滚轮 = 水平平移
+                _translate.X += e.Delta * 0.5;
+                ClampTranslate();
+                e.Handled = true;
+            }
             else
             {
                 // 滚轮 = 上下平移
-                _translate.Y -= e.Delta * 0.5;
+                _translate.Y += e.Delta * 0.5;
                 ClampTranslate();
                 e.Handled = true;
             }
@@ -1278,31 +1285,28 @@ namespace TeamAAS.FlowEditor.Controls
         /// </summary>
         private void ClampTranslate()
         {
-            // 原点固定，不超出内容边界
+            // 原点固定，不超出画布边界
             var vp = GetViewportSize();
-            var bounds = GetContentBounds();
-            if (bounds.Width <= 0 || bounds.Height <= 0) return;
-
-            double margin = 50;
-            double contentW = (bounds.Right + margin) * _scale.ScaleX;
-            double contentH = (bounds.Bottom + margin) * _scale.ScaleY;
+            // 用画布尺寸判断平移范围，而非节点范围
+            double canvasW = (Width > 0 ? Width : 5000) * _scale.ScaleX;
+            double canvasH = (Height > 0 ? Height : 3500) * _scale.ScaleY;
 
             // X 轴：原点不动，不超出右下边界
-            if (contentW <= vp.Width)
+            if (canvasW <= vp.Width)
                 _translate.X = 0;
             else
             {
-                double minX = vp.Width - contentW;
+                double minX = vp.Width - canvasW;
                 if (_translate.X < minX) _translate.X = minX;
                 if (_translate.X > 0) _translate.X = 0;
             }
 
             // Y 轴
-            if (contentH <= vp.Height)
+            if (canvasH <= vp.Height)
                 _translate.Y = 0;
             else
             {
-                double minY = vp.Height - contentH;
+                double minY = vp.Height - canvasH;
                 if (_translate.Y < minY) _translate.Y = minY;
                 if (_translate.Y > 0) _translate.Y = 0;
             }
