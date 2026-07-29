@@ -97,8 +97,8 @@ namespace TeamAAS.FlowEditor.Controls
             AllowDrop = true;
 
             // 初始画布尺寸
-            Width = 2000;
-            Height = 1500;
+            Width = 5000;
+            Height = 3500;
 
             // 初始偏移，显示画布的一部分
             _translate.X = 0;
@@ -1235,19 +1235,20 @@ namespace TeamAAS.FlowEditor.Controls
         /// </summary>
         public Rect GetViewport()
         {
-            // 优先使用父 ScrollViewer 的可视区域
-            double viewW = ActualWidth;
-            double viewH = ActualHeight;
-            var parent = System.Windows.Media.VisualTreeHelper.GetParent(this) as System.Windows.Controls.ContentPresenter;
-            if (parent != null)
+            double viewW = 0, viewH = 0;
+            // 向上遍历可视树查找 ScrollViewer
+            DependencyObject obj = this;
+            while (obj != null && viewW == 0)
             {
-                var sv = System.Windows.Media.VisualTreeHelper.GetParent(parent) as System.Windows.Controls.ScrollViewer;
-                if (sv != null)
+                if (obj is System.Windows.Controls.ScrollViewer sv && sv.ViewportWidth > 0)
                 {
                     viewW = sv.ViewportWidth;
                     viewH = sv.ViewportHeight;
                 }
+                obj = System.Windows.Media.VisualTreeHelper.GetParent(obj);
             }
+            if (viewW <= 0) viewW = ActualWidth > 0 ? ActualWidth : 800;
+            if (viewH <= 0) viewH = ActualHeight > 0 ? ActualHeight : 600;
 
             double x = -_translate.X / _scale.ScaleX;
             double y = -_translate.Y / _scale.ScaleY;
@@ -1257,37 +1258,72 @@ namespace TeamAAS.FlowEditor.Controls
         }
 
         /// <summary>
-        /// 将画布视口居中到指定画布坐标点
+        /// 获取可视区域大小（屏幕像素）
         /// </summary>
-        public void CenterOn(Point canvasPoint)
+        private Size GetViewportSize()
         {
-            // 使用 ScrollViewer 的可视区域来计算居中，而非画布的 ActualWidth/Height
-            double viewW = ActualWidth;
-            double viewH = ActualHeight;
-            var parent = System.Windows.Media.VisualTreeHelper.GetParent(this) as System.Windows.Controls.ContentPresenter;
-            if (parent != null)
+            double viewW = 0, viewH = 0;
+            DependencyObject obj = this;
+            while (obj != null && viewW == 0)
             {
-                var sv = System.Windows.Media.VisualTreeHelper.GetParent(parent) as System.Windows.Controls.ScrollViewer;
-                if (sv != null)
+                if (obj is System.Windows.Controls.ScrollViewer sv && sv.ViewportWidth > 0)
                 {
                     viewW = sv.ViewportWidth;
                     viewH = sv.ViewportHeight;
                 }
+                obj = System.Windows.Media.VisualTreeHelper.GetParent(obj);
             }
-            _translate.X = viewW / 2 - canvasPoint.X * _scale.ScaleX;
-            _translate.Y = viewH / 2 - canvasPoint.Y * _scale.ScaleY;
+            if (viewW <= 0) viewW = ActualWidth > 0 ? ActualWidth : 800;
+            if (viewH <= 0) viewH = ActualHeight > 0 ? ActualHeight : 600;
+            return new Size(viewW, viewH);
+        }
+
+        /// <summary>
+        /// 将画布视口居中到指定画布坐标点
+        /// </summary>
+        public void CenterOn(Point canvasPoint)
+        {
+            var vp = GetViewportSize();
+            _translate.X = vp.Width / 2 - canvasPoint.X * _scale.ScaleX;
+            _translate.Y = vp.Height / 2 - canvasPoint.Y * _scale.ScaleY;
             ClampTranslate();
         }
         #endregion
 
         #region 平移限制
         /// <summary>
-        /// 限制平移范围，确保原点(0,0)始终可见
+        /// 限制平移范围，确保不会看到内容区域之外
         /// </summary>
         private void ClampTranslate()
         {
-            if (_translate.X < 0) _translate.X = 0;
-            if (_translate.Y < 0) _translate.Y = 0;
+            var vp = GetViewportSize();
+            var bounds = GetContentBounds();
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+
+            double margin = 50;
+            // 内容区域在屏幕像素中的大小
+            double contentW = (bounds.Right + margin) * _scale.ScaleX;
+            double contentH = (bounds.Bottom + margin) * _scale.ScaleY;
+
+            // X 轴：原点不动，也不超出右下边界
+            if (contentW <= vp.Width)
+                _translate.X = 0;
+            else
+            {
+                double minX = vp.Width - contentW; // 负值
+                if (_translate.X < minX) _translate.X = minX;
+                if (_translate.X > 0) _translate.X = 0;
+            }
+
+            // Y 轴
+            if (contentH <= vp.Height)
+                _translate.Y = 0;
+            else
+            {
+                double minY = vp.Height - contentH;
+                if (_translate.Y < minY) _translate.Y = minY;
+                if (_translate.Y > 0) _translate.Y = 0;
+            }
         }
         #endregion
 

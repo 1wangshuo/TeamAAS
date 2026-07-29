@@ -165,12 +165,10 @@ namespace TeamAAS.FlowEditor.Controls
             if (_canvas == null) return new Rect(0, 0, 0, 0);
             var bounds = _canvas.GetContentBounds();
             if (bounds.Width <= 0 || bounds.Height <= 0)
-                return new Rect(0, 0, _canvas.Width, _canvas.Height);
-            // 始终从原点(0,0)开始，确保左上角原点不动
-            double margin = 100;
-            double w = Math.Max(bounds.Right + margin, _canvas.ActualWidth > 0 ? _canvas.ActualWidth : 800);
-            double h = Math.Max(bounds.Bottom + margin, _canvas.ActualHeight > 0 ? _canvas.ActualHeight : 600);
-            return new Rect(0, 0, w, h);
+                return new Rect(0, 0, 0, 0);
+            // 只用节点实际范围 + 边距，不用画布尺寸
+            double margin = 50;
+            return new Rect(0, 0, bounds.Right + margin, bounds.Bottom + margin);
         }
         #endregion
 
