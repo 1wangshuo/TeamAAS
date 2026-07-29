@@ -509,6 +509,7 @@ namespace TeamAAS.FlowEditor.Controls
             _translate.Y = _translate.Y + center.Y * (_scale.ScaleY - newScale);
             _scale.ScaleX = newScale;
             _scale.ScaleY = newScale;
+            ClampTranslate();
             ZoomChanged?.Invoke(newScale);
         }
 
@@ -548,6 +549,7 @@ namespace TeamAAS.FlowEditor.Controls
                 // GetPosition(this) 返回本地坐标，delta 需乘以缩放系数转换为屏幕增量
                 _translate.X = _panOrigin.X + (pos.X - _panStart.X) * _scale.ScaleX;
                 _translate.Y = _panOrigin.Y + (pos.Y - _panStart.Y) * _scale.ScaleY;
+                ClampTranslate();
             }
             else if (_isConnecting && _tempPath != null)
             {
@@ -1274,6 +1276,18 @@ namespace TeamAAS.FlowEditor.Controls
             }
             _translate.X = viewW / 2 - canvasPoint.X * _scale.ScaleX;
             _translate.Y = viewH / 2 - canvasPoint.Y * _scale.ScaleY;
+            ClampTranslate();
+        }
+        #endregion
+
+        #region 平移限制
+        /// <summary>
+        /// 限制平移范围，确保原点(0,0)始终可见
+        /// </summary>
+        private void ClampTranslate()
+        {
+            if (_translate.X < 0) _translate.X = 0;
+            if (_translate.Y < 0) _translate.Y = 0;
         }
         #endregion
 

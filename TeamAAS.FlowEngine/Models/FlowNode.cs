@@ -152,7 +152,7 @@ namespace TeamAAS.FlowEditor.Models
                 if (_nodeWidth > 0) return _nodeWidth;
                 switch (Category)
                 {
-                    case NodeCategory.Decision: return 140;
+                    case NodeCategory.Decision: return 180;
                     case NodeCategory.ForLoop: return 180;
                     default: return 160;
                 }
@@ -171,7 +171,7 @@ namespace TeamAAS.FlowEditor.Models
                 if (_nodeHeight > 0) return _nodeHeight;
                 switch (Category)
                 {
-                    case NodeCategory.Decision: return 92;
+                    case NodeCategory.Decision: return 56;
                     case NodeCategory.ForLoop: return 66;
                     default: return 52;
                 }

@@ -138,16 +138,16 @@
 
                             <!-- ========== 菱形节点（Decision） ========== -->
                             <Grid x:Name="DiamondNode" Visibility="Collapsed"
-                                  Width="160" Height="100">
+                                  Width="180" Height="56">
                                 <Path x:Name="DiamondPath"
-                                      Data="M0.5,0 L1,0.5 L0.5,1 L0,0.5 Z"
+                                      Data="M0.12,0 L0.88,0 L1,0.5 L0.88,1 L0.12,1 L0,0.5 Z"
                                       Stretch="Fill"
                                       Fill="{DynamicResource RegionBrush}"
                                       Stroke="{DynamicResource DarkWarningBrush}"
                                       StrokeThickness="1.5"/>
                                 <StackPanel HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            Margin="24,16">
+                                            Margin="30,4">
                                     <TextBlock Text="{Binding NodeName}"
                                                Foreground="{DynamicResource PrimaryTextBrush}"
                                                FontSize="12"
@@ -166,7 +166,7 @@
 
                             <!-- 连接点容器（常驻可见，悬停高亮） -->
                             <Grid x:Name="ConnectorContainer"
-                                  Opacity="0.5" Panel.ZIndex="2">
+                                  Opacity="0" Panel.ZIndex="2">
                                 <!-- 左 -->
                                 <fe:ConnectorControl PortIndex="0" Side="Left"
                                                      VerticalAlignment="Center"
@@ -197,11 +197,12 @@
                                 <Setter TargetName="LoopNode" Property="BorderThickness" Value="2"/>
                                 <Setter TargetName="DiamondPath" Property="StrokeThickness" Value="2.5"/>
                             </Trigger>
-                            <!-- 选中：加粗边框 -->
+                            <!-- 选中：加粗边框 + 显示连接点 -->
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                 <Setter TargetName="RectNode" Property="BorderThickness" Value="2.5"/>
                                 <Setter TargetName="LoopNode" Property="BorderThickness" Value="2.5"/>
                                 <Setter TargetName="DiamondPath" Property="StrokeThickness" Value="3"/>
+                                <Setter TargetName="ConnectorContainer" Property="Opacity" Value="1"/>
                             </DataTrigger>
                             <!-- Decision → 菱形 -->
                             <DataTrigger Binding="{Binding Category}" Value="Decision">
