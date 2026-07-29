@@ -515,15 +515,11 @@ namespace TeamAAS.FlowEditor.Controls
 
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                // Ctrl + 滚轮 = 缩放
-                var mousePos = e.GetPosition(this);
-                double factor = e.Delta > 0 ? ZoomFactor : 1 / ZoomFactor;
-                ZoomAt(mousePos, _scale.ScaleX * factor);
-                e.Handled = true;
-            }
-            // 不按 Ctrl 时不处理，让 ScrollViewer 正常滚动
+            // 滚轮直接缩放（参考 VisionKit）
+            var mousePos = e.GetPosition(this);
+            double factor = e.Delta > 0 ? ZoomFactor : 1 / ZoomFactor;
+            ZoomAt(mousePos, _scale.ScaleX * factor);
+            e.Handled = true;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -1272,34 +1268,28 @@ namespace TeamAAS.FlowEditor.Controls
         /// </summary>
         private void ClampTranslate()
         {
+            // 允许自由平移，仅做软边界限制（参考 VisionKit）
             var vp = GetViewportSize();
             var bounds = GetContentBounds();
             if (bounds.Width <= 0 || bounds.Height <= 0) return;
 
-            double margin = 50;
-            // 内容区域在屏幕像素中的大小
+            double margin = 100;
             double contentW = (bounds.Right + margin) * _scale.ScaleX;
             double contentH = (bounds.Bottom + margin) * _scale.ScaleY;
+            double overscroll = vp.Width * 0.5; // 允许半屏过度平移
 
-            // X 轴：原点不动，也不超出右下边界
-            if (contentW <= vp.Width)
-                _translate.X = 0;
-            else
-            {
-                double minX = vp.Width - contentW; // 负值
-                if (_translate.X < minX) _translate.X = minX;
-                if (_translate.X > 0) _translate.X = 0;
-            }
+            // X 轴
+            double minX = vp.Width - contentW - overscroll;
+            double maxX = overscroll;
+            if (_translate.X < minX) _translate.X = minX;
+            if (_translate.X > maxX) _translate.X = maxX;
 
             // Y 轴
-            if (contentH <= vp.Height)
-                _translate.Y = 0;
-            else
-            {
-                double minY = vp.Height - contentH;
-                if (_translate.Y < minY) _translate.Y = minY;
-                if (_translate.Y > 0) _translate.Y = 0;
-            }
+            overscroll = vp.Height * 0.5;
+            double minY = vp.Height - contentH - overscroll;
+            double maxY = overscroll;
+            if (_translate.Y < minY) _translate.Y = minY;
+            if (_translate.Y > maxY) _translate.Y = maxY;
         }
         #endregion
 
