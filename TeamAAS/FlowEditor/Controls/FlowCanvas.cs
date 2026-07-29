@@ -67,6 +67,13 @@ namespace TeamAAS.FlowEditor.Controls
 
         #region 属性
         public double Zoom => _scale.ScaleX;
+        public double TranslateX => _translate.X;
+        public double TranslateY => _translate.Y;
+
+        public void SetTranslateX(double x) { _translate.X = x; }
+        public void SetTranslateY(double y) { _translate.Y = y; }
+
+        public Size ViewportSize => GetViewportSize();
 
         public FlowGraph Graph
         {

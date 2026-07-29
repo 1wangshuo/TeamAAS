@@ -1,8 +1,11 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Threading;
 using TeamAAS.FlowEditor.Plugins;
+using TeamAAS.Standard;
 
 namespace TeamAAS.FlowEditor
 {
@@ -15,6 +18,8 @@ namespace TeamAAS.FlowEditor
         private Point _dragStart;
         private bool _isDragging;
         private bool _initialized;
+        private DispatcherTimer _scrollSyncTimer;
+        private bool _isScrollingFromCode;
 
         public FlowEditorView()
         {
@@ -54,7 +59,52 @@ namespace TeamAAS.FlowEditor
                 var node = sleepPlugin.CreateNode(200, 150);
                 _vm.Graph.AddNode(node);
             }
+
+            // 滚动条同步定时器
+            _scrollSyncTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(60) };
+            _scrollSyncTimer.Tick += SyncScrollBars;
+            _scrollSyncTimer.Start();
         }
+
+        #region 滚动条同步
+        private void SyncScrollBars(object sender, EventArgs e)
+        {
+            if (EditorCanvas == null) return;
+            _isScrollingFromCode = true;
+
+            var vp = EditorCanvas.ViewportSize;
+            double canvasW = (EditorCanvas.Width > 0 ? EditorCanvas.Width : 5000) * EditorCanvas.Zoom;
+            double canvasH = (EditorCanvas.Height > 0 ? EditorCanvas.Height : 3500) * EditorCanvas.Zoom;
+
+            // 垂直滚动条
+            double vMax = Math.Max(0, canvasH - vp.Height);
+            VScrollBar.Maximum = vMax;
+            VScrollBar.ViewportSize = vp.Height;
+            VScrollBar.Value = Math.Max(0, Math.Min(vMax, -EditorCanvas.TranslateY));
+            VScrollBar.Visibility = vMax > 1 ? Visibility.Visible : Visibility.Collapsed;
+
+            // 水平滚动条
+            double hMax = Math.Max(0, canvasW - vp.Width);
+            HScrollBar.Maximum = hMax;
+            HScrollBar.ViewportSize = vp.Width;
+            HScrollBar.Value = Math.Max(0, Math.Min(hMax, -EditorCanvas.TranslateX));
+            HScrollBar.Visibility = hMax > 1 ? Visibility.Visible : Visibility.Collapsed;
+
+            _isScrollingFromCode = false;
+        }
+
+        private void VScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            if (_isScrollingFromCode) return;
+            EditorCanvas.SetTranslateY(-e.NewValue);
+        }
+
+        private void HScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            if (_isScrollingFromCode) return;
+            EditorCanvas.SetTranslateX(-e.NewValue);
+        }
+        #endregion
 
         #region 工具箱拖拽
         private void ToolboxItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

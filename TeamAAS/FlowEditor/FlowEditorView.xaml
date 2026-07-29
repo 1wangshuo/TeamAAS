@@ -315,16 +315,24 @@
                 </DockPanel>
             </Border>
 
-            <!-- 中: 画布 + 鸟瞰图 -->
+            <!-- 中: 画布 + 滚动条 + 鸟瞰图 -->
             <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Background="{DynamicResource SecondaryRegionBrush}" ClipToBounds="True">
                 <fe:FlowCanvas x:Name="EditorCanvas"
                                Background="{StaticResource GridBrush}"
                                ClipToBounds="True"/>
+                <ScrollBar x:Name="VScrollBar" Orientation="Vertical"
+                           HorizontalAlignment="Right" Width="16"
+                           SmallChange="20" LargeChange="200"
+                           Scroll="VScrollBar_Scroll"/>
+                <ScrollBar x:Name="HScrollBar" Orientation="Horizontal"
+                           VerticalAlignment="Bottom" Height="16"
+                           SmallChange="20" LargeChange="200"
+                           Scroll="HScrollBar_Scroll"/>
                 <fe:MinimapControl x:Name="Minimap"
                                    Width="200" Height="140"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Bottom"
-                                   Margin="0,0,8,8"
+                                   Margin="0,0,20,20"
                                    Canvas="{Binding ElementName=EditorCanvas}"/>
             </Grid>
 
