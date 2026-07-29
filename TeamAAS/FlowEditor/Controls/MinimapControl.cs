@@ -137,9 +137,11 @@ namespace TeamAAS.FlowEditor.Controls
                 viewport.Y * scale + offsetY,
                 viewport.Width * scale,
                 viewport.Height * scale);
+            var vpBrush = new SolidColorBrush(Color.FromArgb(30, 0, 122, 204));
+            vpBrush.Freeze();
             var vpPen = new Pen(new SolidColorBrush(Color.FromArgb(200, 0, 122, 204)), 1.5);
             vpPen.Freeze();
-            dc.DrawRectangle(null, vpPen, vpRect);
+            dc.DrawRectangle(vpBrush, vpPen, vpRect);
 
             // 结束裁剪
             dc.Pop();
@@ -163,12 +165,25 @@ namespace TeamAAS.FlowEditor.Controls
         private Rect CalculateContentBounds()
         {
             if (_canvas == null) return new Rect(0, 0, 0, 0);
-            var bounds = _canvas.GetContentBounds();
-            if (bounds.Width <= 0 || bounds.Height <= 0)
-                return new Rect(0, 0, 0, 0);
-            // 只用节点实际范围 + 边距，不用画布尺寸
-            double margin = 50;
-            return new Rect(0, 0, bounds.Right + margin, bounds.Bottom + margin);
+            var contentBounds = _canvas.GetContentBounds();
+            var viewport = _canvas.GetViewport();
+            double margin = 30;
+
+            if (contentBounds.Width <= 0 || contentBounds.Height <= 0)
+            {
+                // 无节点时，仅显示视口区域
+                return new Rect(viewport.X - margin, viewport.Y - margin,
+                                viewport.Width + margin * 2, viewport.Height + margin * 2);
+            }
+
+            // 取节点边界和视口的并集，确保鸟瞰图中两者都可见
+            double minX = Math.Min(contentBounds.X, viewport.X);
+            double minY = Math.Min(contentBounds.Y, viewport.Y);
+            double maxX = Math.Max(contentBounds.Right, viewport.Right);
+            double maxY = Math.Max(contentBounds.Bottom, viewport.Bottom);
+
+            return new Rect(minX - margin, minY - margin,
+                            maxX - minX + margin * 2, maxY - minY + margin * 2);
         }
         #endregion
 
