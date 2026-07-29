@@ -1235,47 +1235,23 @@ namespace TeamAAS.FlowEditor.Controls
         /// </summary>
         public Rect GetViewport()
         {
-            double viewW = 0, viewH = 0;
-            // 向上遍历可视树查找 ScrollViewer
-            DependencyObject obj = this;
-            while (obj != null && viewW == 0)
-            {
-                if (obj is System.Windows.Controls.ScrollViewer sv && sv.ViewportWidth > 0)
-                {
-                    viewW = sv.ViewportWidth;
-                    viewH = sv.ViewportHeight;
-                }
-                obj = System.Windows.Media.VisualTreeHelper.GetParent(obj);
-            }
-            if (viewW <= 0) viewW = ActualWidth > 0 ? ActualWidth : 800;
-            if (viewH <= 0) viewH = ActualHeight > 0 ? ActualHeight : 600;
-
+            var vp = GetViewportSize();
             double x = -_translate.X / _scale.ScaleX;
             double y = -_translate.Y / _scale.ScaleY;
-            double w = viewW / _scale.ScaleX;
-            double h = viewH / _scale.ScaleY;
+            double w = vp.Width / _scale.ScaleX;
+            double h = vp.Height / _scale.ScaleY;
             return new Rect(x, y, w, h);
         }
 
         /// <summary>
-        /// 获取可视区域大小（屏幕像素）
+        /// 获取可视区域大小（屏幕像素）- 取父容器的实际尺寸
         /// </summary>
         private Size GetViewportSize()
         {
-            double viewW = 0, viewH = 0;
-            DependencyObject obj = this;
-            while (obj != null && viewW == 0)
-            {
-                if (obj is System.Windows.Controls.ScrollViewer sv && sv.ViewportWidth > 0)
-                {
-                    viewW = sv.ViewportWidth;
-                    viewH = sv.ViewportHeight;
-                }
-                obj = System.Windows.Media.VisualTreeHelper.GetParent(obj);
-            }
-            if (viewW <= 0) viewW = ActualWidth > 0 ? ActualWidth : 800;
-            if (viewH <= 0) viewH = ActualHeight > 0 ? ActualHeight : 600;
-            return new Size(viewW, viewH);
+            var parent = System.Windows.Media.VisualTreeHelper.GetParent(this) as FrameworkElement;
+            if (parent != null && parent.ActualWidth > 0 && parent.ActualHeight > 0)
+                return new Size(parent.ActualWidth, parent.ActualHeight);
+            return new Size(800, 600);
         }
 
         /// <summary>
