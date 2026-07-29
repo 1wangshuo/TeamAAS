@@ -240,6 +240,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
 
         <!-- 顶部工具栏 -->
@@ -376,38 +377,6 @@
                             <TextBlock Text="{Binding SelectedNode.CostTimeText}" FontSize="12"
                                        Foreground="{DynamicResource PrimaryTextBrush}"/>
 
-                            <!-- 执行结果表格 -->
-                            <TextBlock Text="执行结果" FontSize="11"
-                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,12,0,4"/>
-                            <DataGrid ItemsSource="{Binding SelectedNode.ResultItems}"
-                                      AutoGenerateColumns="False"
-                                      HeadersVisibility="Column"
-                                      IsReadOnly="True"
-                                      GridLinesVisibility="Horizontal"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      CanUserResizeColumns="True"
-                                      SelectionMode="Single"
-                                      SelectionUnit="Cell"
-                                      ClipboardCopyMode="ExcludeHeader"
-                                      BorderThickness="1"
-                                      BorderBrush="{DynamicResource BorderBrush}"
-                                      Background="{DynamicResource RegionBrush}"
-                                      RowBackground="{DynamicResource RegionBrush}"
-                                      AlternatingRowBackground="{DynamicResource SecondaryRegionBrush}"
-                                      ColumnHeaderHeight="24"
-                                      RowHeight="24"
-                                      FontSize="11"
-                                      MaxHeight="300">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="键" Binding="{Binding Key}" Width="*"/>
-                                    <DataGridTextColumn Header="值" Binding="{Binding Value}" Width="2*"/>
-                                    <DataGridTextColumn Header="类型" Binding="{Binding TypeName}" Width="*"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <TextBlock Text="选中单元格按 Ctrl+C 复制" FontSize="10"
-                                       Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
-
                             <!-- 编辑属性按钮 -->
                             <Button Content="编辑属性" Padding="12,4" Click="EditProperties_Click" Margin="0,16,0,0">
                                 <Button.Style>
@@ -439,5 +408,45 @@
                 </DockPanel>
             </Border>
         </Grid>
+
+        <!-- 底部: 执行结果表格（全宽） -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource RegionBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="12,6,12,4">
+                    <TextBlock Text="执行结果" FontSize="13" FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="选中单元格按 Ctrl+C 复制" FontSize="10"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               VerticalAlignment="Center" Margin="16,0,0,0"/>
+                </DockPanel>
+                <DataGrid ItemsSource="{Binding SelectedNode.ResultItems}"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserResizeColumns="True"
+                          SelectionMode="Single"
+                          SelectionUnit="Cell"
+                          ClipboardCopyMode="ExcludeHeader"
+                          BorderThickness="0"
+                          Background="{DynamicResource RegionBrush}"
+                          RowBackground="{DynamicResource RegionBrush}"
+                          AlternatingRowBackground="{DynamicResource SecondaryRegionBrush}"
+                          ColumnHeaderHeight="26"
+                          RowHeight="26"
+                          FontSize="12"
+                          Margin="8,0,8,4">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="键" Binding="{Binding Key}" Width="*"/>
+                        <DataGridTextColumn Header="值" Binding="{Binding Value}" Width="3*"/>
+                        <DataGridTextColumn Header="类型" Binding="{Binding TypeName}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
     </Grid>
 </UserControl>
